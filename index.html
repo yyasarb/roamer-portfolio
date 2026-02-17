@@ -68,6 +68,13 @@
 <style>
   @font-face {
     font-family: 'IvyPresto Headline';
+    src: url('fonts/IvyPrestoHeadline-Regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'IvyPresto Headline';
     src: url('fonts/IvyPrestoHeadline-SemiBold.otf') format('opentype');
     font-weight: 600;
     font-style: normal;
@@ -82,17 +89,18 @@
     font-weight: 600 !important;
     text-transform: lowercase !important;
   }
+  .menulink {
+    font-size: 1rem !important;
+  }
+  .heading.hometitle {
+    font-size: 1.2rem !important;
+  }
+  .footerlink {
+    font-size: 1rem !important;
+  }
 </style>
 </head>
 <body class="body">
-  <div class="sitecss w-embed">
-    <style>
-        .socialiconcodesvg.w-embed svg {
-          width: 16px;
-          height: 16px;
-        }
-      </style>
-  </div>
   <main class="w-layout-blockcontainer main-content w-container">
     <header class="w-layout-blockcontainer sitenav w-container">
       <figure class="w-layout-blockcontainer sitelogo w-container">
@@ -100,9 +108,9 @@
       </figure>
       <nav class="mainnavmenu">
         <a href="works.html" class="menulink white">work</a>
-        <a href="blog.html" style="display:none" class="menulink white">BLOG</a>
+        <a href="blog.html" style="display:none" class="menulink white">blog</a>
         <a href="about.html" class="menulink white">about</a>
-        <a href="contact.html" class="menulink white">contact me</a>
+
       </nav>
     </header>
     <figure class="bgoverlay"></figure>

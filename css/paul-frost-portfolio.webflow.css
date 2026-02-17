@@ -1,34 +1,4 @@
-@font-face {
-  font-family: Nohemi;
-  src: url('../fonts/nohemi-bold-webfont.woff2') format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: Nohemi;
-  src: url('../fonts/nohemi-semibold-webfont.woff2') format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: Nohemi;
-  src: url('../fonts/nohemi-thin-webfont.woff2') format("woff2");
-  font-weight: 100;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: Nohemi;
-  src: url('../fonts/nohemi-medium-webfont.woff2') format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
+@import url('https://fonts.cdnfonts.com/css/neue-haas-grotesk-display-pro');
 
 @font-face {
   font-family: Tanker;
@@ -38,22 +8,15 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: Nohemi;
-  src: url('../fonts/nohemi-regular-webfont.woff2') format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
 
 :root {
-  --ydarkblue: #023047;
+  --ydarkblue: #1a1a1a;
   --black: black;
   --headerheight: 56px;
-  --ygreenyblue: #264653;
+  --ygreenyblue: #1a1a1a;
   --purewhite: #fff;
-  --ycream: #ffecd1;
-  --yyellow: #ffb703;
+  --ycream: #f5f5f0;
+  --yyellow: #fff;
 }
 
 .w-layout-blockcontainer {
@@ -104,9 +67,9 @@ a {
 }
 
 .logotext {
-  color: #ffecd1;
+  color: var(--ycream);
   width: 8ch;
-  font-family: Nohemi, sans-serif;
+  font-family: 'Neue Haas Grotesk Display Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 17px;
   font-weight: 600;
 }
@@ -157,7 +120,7 @@ a {
 }
 
 .body {
-  font-family: Nohemi, sans-serif;
+  font-family: 'Neue Haas Grotesk Display Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 500;
 }
 
@@ -191,12 +154,15 @@ a {
 .mainnavmenu {
   height: var(--headerheight);
   max-height: var(--headerheight);
-  grid-column-gap: 106px;
-  grid-row-gap: 106px;
+  grid-column-gap: 60px;
+  grid-row-gap: 60px;
   flex-flow: row;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   display: flex;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .menulink {
@@ -705,7 +671,7 @@ a {
 .body-single-work {
   background-color: var(--purewhite);
   color: var(--black);
-  font-family: Nohemi, sans-serif;
+  font-family: 'Neue Haas Grotesk Display Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 700;
 }
 
@@ -796,7 +762,7 @@ a {
 .sworktextcontent.spost {
   margin-left: auto;
   margin-right: auto;
-  font-family: Nohemi, sans-serif;
+  font-family: 'Neue Haas Grotesk Display Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 400;
 }
 
@@ -842,7 +808,7 @@ a {
 .body-blog {
   background-color: var(--purewhite);
   color: #000;
-  font-family: Nohemi, sans-serif;
+  font-family: 'Neue Haas Grotesk Display Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 700;
 }
 
@@ -870,7 +836,7 @@ a {
 .body-about {
   background-color: var(--ycream);
   color: var(--ygreenyblue);
-  font-family: Nohemi, sans-serif;
+  font-family: 'Neue Haas Grotesk Display Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 700;
 }
 
@@ -966,6 +932,8 @@ a {
     grid-row-gap: 26px;
     position: absolute;
     inset: 0% 10px auto auto;
+    left: auto;
+    transform: none;
   }
 
   .heading.hometitle {
@@ -1437,49 +1405,6 @@ a {
 }
 
 
-@font-face {
-  font-family: 'Nohemi';
-  src: url('../fonts/nohemi-bold-webfont.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Nohemi';
-  src: url('../fonts/nohemi-semibold-webfont.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Nohemi';
-  src: url('../fonts/nohemi-thin-webfont.woff2') format('woff2');
-  font-weight: 100;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Nohemi';
-  src: url('../fonts/nohemi-medium-webfont.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Tanker';
-  src: url('../fonts/tanker-regular-webfont.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Nohemi';
-  src: url('../fonts/nohemi-regular-webfont.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* Logo responsive sizing */
 .logoimage {
   width: 80px;
@@ -1583,4 +1508,18 @@ a {
   font-weight: 400;
   text-align: center;
   margin-bottom: 20px;
+}
+
+.socialiconcodesvg.w-embed svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media screen and (min-width: 1280px) {
+  .sworkcontentwrap {
+    justify-content: space-between;
+    align-items: flex-start;
+    display: flex;
+    padding-inline-end: calc((100% - 1200px) / 2);
+  }
 }
