@@ -732,9 +732,10 @@
     }
   });
 
+  gsap.set(skillsBox, { borderRadius: '19px' });
   skillsTl.fromTo(skillsBox,
-    { margin: '48px', borderRadius: '48px' },
-    { margin: '0px', borderRadius: '0px', duration: 1, ease: 'none' },
+    { marginLeft: '30px', marginRight: '30px', marginTop: '30px', marginBottom: '30px' },
+    { marginLeft: '0px', marginRight: '0px', marginTop: '0px', marginBottom: '0px', duration: 1, ease: 'none' },
     0
   );
 
@@ -749,8 +750,8 @@
   });
 
   shrinkTl.fromTo(skillsBox,
-    { margin: '0px', borderRadius: '0px' },
-    { margin: '48px', borderRadius: '48px', duration: 1, ease: 'none' },
+    { marginLeft: '0px', marginRight: '0px', marginTop: '0px', marginBottom: '0px' },
+    { marginLeft: '30px', marginRight: '30px', marginTop: '30px', marginBottom: '30px', duration: 1, ease: 'none' },
     0
   );
 

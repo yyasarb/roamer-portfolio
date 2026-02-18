@@ -108,26 +108,17 @@
     '[data-config].editor-hoverable:hover{outline-color:#2563eb}' +
     '[data-config][contenteditable="true"]{outline:2px solid #2563eb!important;outline-offset:2px;background:rgba(37,99,235,0.05);min-height:1em}' +
     '[data-section].editor-section-off{opacity:0.3;pointer-events:none}' +
-    /* Edit mode: force video player visible at full scale */
-    'body.editor-active .video-section__player{transform:none!important;border-radius:16px!important;opacity:1!important}' +
-    'body.editor-active .video-section__heading{opacity:1!important;transform:none!important}' +
-    'body.editor-active .video-section__sub{opacity:1!important;transform:none!important}' +
-    'body.editor-active .video-section__text{opacity:1!important;transform:none!important}' +
-    'body.editor-active .video-outro{opacity:1!important;transform:none!important;position:relative!important;top:auto!important}' +
+    /* Edit mode: hide play overlay */
     'body.editor-active .video-play-overlay{display:none!important}' +
-    /* Edit mode: force skills items fully visible */
-    'body.editor-active .skills-item__num{opacity:1!important}' +
-    'body.editor-active .skills-item__desc{opacity:1!important}' +
-    'body.editor-active .skills-item{pointer-events:auto}' +
-    'body.editor-active .skills-box{margin:0!important;border-radius:0!important}' +
-    /* Edit mode: force char reveals visible */
-    'body.editor-active .char{opacity:1!important}' +
+    /* Edit mode: fix video outro layout */
+    'body.editor-active .video-outro{position:relative!important;top:auto!important}' +
     /* Edit mode: fix proof step titles — show primary, hide duplicate, disable slide mask */
     'body.editor-active .proof-step__title-mask{overflow:visible!important}' +
     'body.editor-active .proof-step__title-slide{transform:none!important;display:block}' +
     'body.editor-active [data-config-title-dup]{display:none!important}' +
     'body.editor-active .proof-step__title-text[data-config]{display:block}' +
     /* Edit mode: skills inline editing */
+    'body.editor-active .skills-item{pointer-events:auto}' +
     'body.editor-active .skills-item__word.editor-hoverable:hover{outline-color:#2563eb}' +
     'body.editor-active .skills-item__desc.editor-hoverable:hover{outline-color:#2563eb}';
   document.head.appendChild(style);
@@ -135,12 +126,60 @@
   // Add editor-active class to body
   document.body.classList.add('editor-active');
 
-  // Kill GSAP pinning and scroll animations so sections flow naturally in edit mode
+  // Kill ALL ScrollTrigger instances so no scroll animation runs in edit mode
   if (typeof ScrollTrigger !== 'undefined') {
     ScrollTrigger.getAll().forEach(function (st) {
-      if (st.pin) st.kill(true);
+      st.kill(true);
     });
     ScrollTrigger.refresh();
+  }
+
+  // Force-reset GSAP-animated elements to their visual end state
+  if (typeof gsap !== 'undefined') {
+    // Video player: reset to full-size natural state
+    var playerEl = document.getElementById('videoPlayer');
+    if (playerEl) {
+      gsap.set(playerEl, { scale: 1, rotate: 0, y: 0, borderRadius: '16px', clearProps: '' });
+    }
+
+    // Video text elements: force visible
+    var videoHeading = document.querySelector('.video-section__heading');
+    var videoSub = document.querySelector('.video-section__sub');
+    var videoText1 = document.getElementById('videoText1');
+    var videoOutro = document.getElementById('videoOutro');
+    [videoHeading, videoSub, videoText1, videoOutro].forEach(function (el) {
+      if (el) gsap.set(el, { opacity: 1, y: 0, clearProps: 'transform' });
+    });
+
+    // Video footer: reset position for full-scale player
+    var footer = document.querySelector('.video-section__footer');
+    if (footer) {
+      footer.style.position = 'relative';
+      footer.style.top = 'auto';
+    }
+
+    // Skills box: reset to expanded (end) state
+    var skillsBox = document.querySelector('.skills-box');
+    if (skillsBox) {
+      gsap.set(skillsBox, { marginLeft: '30px', marginRight: '30px', marginTop: '0px', marginBottom: '0px', borderRadius: '19px' });
+    }
+
+    // Skills items: force visible
+    document.querySelectorAll('.skills-item__num').forEach(function (el) {
+      gsap.set(el, { opacity: 1 });
+    });
+    document.querySelectorAll('.skills-item__desc').forEach(function (el) {
+      gsap.set(el, { opacity: 1 });
+    });
+
+    // Proof box: reset parallax
+    var proofBox = document.getElementById('proofBox');
+    if (proofBox) gsap.set(proofBox, { y: 0 });
+
+    // Char-by-char reveals: force visible
+    document.querySelectorAll('.char').forEach(function (el) {
+      gsap.set(el, { opacity: 1 });
+    });
   }
 
   // Kill GSAP hover handlers on skills by intercepting events
