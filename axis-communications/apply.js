@@ -266,6 +266,9 @@
   var section = document.querySelector('.clients-section');
   if (!section) return;
 
+  var isMobile = window.matchMedia('(max-width: 767px)').matches;
+  if (isMobile) return;
+
   var targets = [heading, outro].filter(Boolean);
   targets.forEach(function (el) {
     gsap.to(el, {
@@ -312,8 +315,6 @@
     var rawText = heading.innerHTML.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '');
     var words = rawText.split(/\s+/).filter(function (w) { return w.length > 0; });
     heading.innerHTML = '';
-    var startLH = 50;
-    var endLH = 90;
     var containerWidth = window.innerWidth - 10;
     var measure = document.createElement('span');
     measure.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-family:inherit;font-weight:inherit;font-size:100px;';
@@ -327,12 +328,15 @@
     var fixedSize = (containerWidth / maxWordWidth) * 100;
     heading.removeChild(measure);
     for (var wi = 0; wi < words.length; wi++) {
-      var lh = words.length > 1 ? startLH + (endLH - startLH) * (wi / (words.length - 1)) : startLH;
+      var isStory = words[wi].toLowerCase() === 'story';
       var wordSpan = document.createElement('span');
-      wordSpan.style.lineHeight = lh + '%';
+      wordSpan.style.lineHeight = isStory ? '1.2' : '0.8';
       wordSpan.style.display = 'block';
       wordSpan.style.fontSize = fixedSize + 'px';
       wordSpan.textContent = words[wi];
+      if (isStory) {
+        wordSpan.classList.add('heading-italic');
+      }
       heading.appendChild(wordSpan);
     }
   }
@@ -382,71 +386,75 @@
   }
 
   // --- GSAP scroll timeline ---
-  var tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: section,
-      start: 'top top',
-      end: '+=160%',
-      pin: true,
-      scrub: 0.5,
-      onUpdate: function (self) {
-        var progress = self.progress;
-
-        if (progress >= 0.50 && !isFullScale) {
-          isFullScale = true;
-          if (!isPlaying && overlay) overlay.classList.add('is-visible');
-        } else if (progress < 0.50 && isFullScale) {
-          isFullScale = false;
-          if (isPlaying) {
-            isPlaying = false;
-            playerEl.classList.remove('is-playing');
-            if (vimeo) {
-              vimeo.setVolume(0);
-              vimeo.pause();
+  if (isMobile) {
+    // Mobile: no pin, natural flow — video scales up on scroll
+    gsap.fromTo(playerEl,
+      { scale: 0.3, rotate: 3, borderRadius: '24px' },
+      { scale: 1.0, rotate: 0, borderRadius: '16px', ease: 'none',
+        scrollTrigger: {
+          trigger: playerEl,
+          start: 'top 100%',
+          end: 'top 30%',
+          scrub: 0.5,
+          onUpdate: function (self) {
+            if (self.progress >= 0.90 && !isFullScale) {
+              isFullScale = true;
+              if (!isPlaying && overlay) overlay.classList.add('is-visible');
+            } else if (self.progress < 0.90 && isFullScale) {
+              isFullScale = false;
+              if (isPlaying) {
+                isPlaying = false;
+                playerEl.classList.remove('is-playing');
+                if (vimeo) { vimeo.setVolume(0); vimeo.pause(); }
+              }
+              if (overlay) overlay.classList.remove('is-visible');
             }
           }
-          if (overlay) overlay.classList.remove('is-visible');
         }
       }
-    }
-  });
-
-  var mobileVideoY = 0;
-  var mobileVideoStart = 0;
-  if (isMobile) {
-    var playerRect = playerEl.getBoundingClientRect();
-    var sectionRect = section.getBoundingClientRect();
-    var playerOffsetInSection = playerRect.top - sectionRect.top;
-    var targetTop = window.innerHeight * 0.30;
-    mobileVideoY = targetTop - playerOffsetInSection;
-
-    // Calculate when heading bottom reaches 70vh
-    var headingRect = heading.getBoundingClientRect();
-    var headingInitialBottom = headingRect.bottom;
-    var trigger70vh = window.innerHeight * 0.70;
-    // heading moves -160vh over duration 1.0 (matches scroll speed)
-    var scrollTravel = window.innerHeight * 1.60;
-    if (headingInitialBottom > trigger70vh) {
-      mobileVideoStart = (headingInitialBottom - trigger70vh) / scrollTravel;
-    }
-  }
-  tl.fromTo(playerEl,
-    { scale: 0.3, rotate: 3, y: 0, borderRadius: isMobile ? '24px' : '48px' },
-    { scale: isMobile ? 1.0 : 0.88, rotate: 0, y: isMobile ? mobileVideoY : '-20vh', borderRadius: isMobile ? '16px' : '24px', duration: 0.50, ease: 'none' },
-    isMobile ? mobileVideoStart : 0
-  );
-
-  if (isMobile) {
-    // Move heading at natural scroll speed: total pin scroll = 160vh, full timeline = 1.0
-    // So 1.0 of timeline = 160vh of y-travel to match real scroll
-    tl.fromTo(heading, { y: 0 }, { y: '-160vh', duration: 1.0, ease: 'none' }, 0);
-    tl.fromTo(sub,     { y: 0 }, { y: '-160vh', duration: 1.0, ease: 'none' }, 0);
-    // Fade out when bottom reaches 70vh
-    tl.fromTo(heading, { opacity: 1 }, { opacity: 0, duration: 0.15, ease: 'none' }, mobileVideoStart);
-    tl.fromTo(sub,     { opacity: 1 }, { opacity: 0, duration: 0.10, ease: 'none' }, mobileVideoStart + 0.05);
-    // "Now imagine..." appears at the same time as video
-    tl.fromTo(text1,   { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.15, ease: 'none' }, mobileVideoStart);
+    );
+    // "Now imagine..." fades in after video
+    gsap.fromTo(text1,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, ease: 'none',
+        scrollTrigger: {
+          trigger: text1,
+          start: 'top 85%',
+          end: 'top 60%',
+          scrub: true
+        }
+      }
+    );
   } else {
+    var tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: '+=160%',
+        pin: true,
+        scrub: 0.5,
+        onUpdate: function (self) {
+          var progress = self.progress;
+          if (progress >= 0.50 && !isFullScale) {
+            isFullScale = true;
+            if (!isPlaying && overlay) overlay.classList.add('is-visible');
+          } else if (progress < 0.50 && isFullScale) {
+            isFullScale = false;
+            if (isPlaying) {
+              isPlaying = false;
+              playerEl.classList.remove('is-playing');
+              if (vimeo) { vimeo.setVolume(0); vimeo.pause(); }
+            }
+            if (overlay) overlay.classList.remove('is-visible');
+          }
+        }
+      }
+    });
+    tl.fromTo(playerEl,
+      { scale: 0.3, rotate: 3, y: 0, borderRadius: '48px' },
+      { scale: 0.88, rotate: 0, y: '-20vh', borderRadius: '24px', duration: 0.50, ease: 'none' },
+      0
+    );
     tl.fromTo(heading, { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.25, ease: 'none' }, 0.10);
     tl.fromTo(sub,     { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.20, ease: 'none' }, 0.15);
     tl.fromTo(text1,   { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.15, ease: 'none' }, 0.25);
@@ -457,13 +465,13 @@
   function positionFooter() {
     if (!footer) return;
     if (isMobile) {
-      var videoTop = window.innerHeight * 0.20;
-      var videoH = playerEl.offsetHeight;
-      footer.style.top = (videoTop + videoH + 24) + 'px';
+      // Mobile: footer flows naturally, no absolute positioning needed
+      footer.style.position = 'relative';
+      footer.style.top = 'auto';
     } else {
       var videoCenter = window.innerHeight * 0.30;
       var videoVisualHalfH = (playerEl.offsetHeight * 0.88) / 2;
-      footer.style.top = 'calc(' + (videoCenter + videoVisualHalfH) + 'px + 3rem)';
+      footer.style.top = 'calc(' + (videoCenter + videoVisualHalfH) + 'px + 15rem)';
     }
   }
   positionFooter();
@@ -488,26 +496,47 @@
       outroChars.push(span);
     }
 
-    // Show the container, then reveal chars
-    var outroStart = isMobile ? 0.75 : 0.55;
-    tl.to(videoOutro, { opacity: 1, duration: 0.01, ease: 'none' }, outroStart);
-
-    if (outroChars.length) {
-      var totalReveal = isSmallMobile ? 2.00 : isMobile ? 0.80 : 0.20;
-      var charDuration = outroChars.length > 1 ? totalReveal / outroChars.length : totalReveal;
-      tl.to(outroChars, {
-        opacity: 1,
-        stagger: charDuration,
-        duration: charDuration,
-        ease: 'none'
-      }, outroStart);
-    }
-
-    // Animate outro position
     if (isMobile) {
-      videoOutro.style.top = '72vh';
-      tl.to(videoOutro, { top: '68vh', duration: 0.20, ease: 'none' }, outroStart);
+      // Mobile: standalone scroll-triggered char reveal (no pin)
+      gsap.to(videoOutro, {
+        opacity: 1, duration: 0.01, ease: 'none',
+        scrollTrigger: {
+          trigger: videoOutro,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      });
+
+      if (outroChars.length) {
+        gsap.to(outroChars, {
+          opacity: 1,
+          stagger: 0.02,
+          duration: 0.02,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: videoOutro,
+            start: 'top 90%',
+            end: 'top 70%',
+            scrub: true
+          }
+        });
+      }
     } else {
+      // Desktop: reveal inside pinned timeline
+      var outroStart = 0.55;
+      tl.to(videoOutro, { opacity: 1, duration: 0.01, ease: 'none' }, outroStart);
+
+      if (outroChars.length) {
+        var totalReveal = 0.20;
+        var charDuration = outroChars.length > 1 ? totalReveal / outroChars.length : totalReveal;
+        tl.to(outroChars, {
+          opacity: 1,
+          stagger: charDuration,
+          duration: charDuration,
+          ease: 'none'
+        }, outroStart);
+      }
+
       tl.to(videoOutro, { top: '75vh', duration: 0.20, ease: 'none' }, 0.55);
     }
   }
@@ -646,6 +675,7 @@
 
   // --- Hover interaction: character-by-character animation ---
   var skillsItems = skillsSection.querySelectorAll('.skills-item');
+  var skillsMobile = window.matchMedia('(max-width: 767px)').matches;
 
   function splitIntoChars(el) {
     var text = el.textContent;
@@ -671,39 +701,46 @@
     var numText = numEl.textContent;
     var descText = descEl.textContent;
 
-    item.addEventListener('mouseenter', function () {
-      item.classList.add('is-hovered');
+    if (skillsMobile) {
+      // Mobile: always visible, no interaction
+      gsap.set(numEl, { opacity: 1 });
+      gsap.set(descEl, { opacity: 1 });
+    } else {
+      // Desktop: hover interaction
+      item.addEventListener('mouseenter', function () {
+        item.classList.add('is-hovered');
 
-      // Kill any running tweens to prevent stale state
-      gsap.killTweensOf(numEl);
-      gsap.killTweensOf(descEl);
-      restoreText(numEl, numText);
+        // Kill any running tweens to prevent stale state
+        gsap.killTweensOf(numEl);
+        gsap.killTweensOf(descEl);
+        restoreText(numEl, numText);
 
-      // Split and animate number
-      var numChars = splitIntoChars(numEl);
-      gsap.fromTo(numChars,
-        { opacity: 0, y: 8 },
-        { opacity: 1, y: 0, stagger: 0.03, duration: 0.3, ease: 'power2.out' }
-      );
-      gsap.to(numEl, { opacity: 1, duration: 0.01 });
+        // Split and animate number
+        var numChars = splitIntoChars(numEl);
+        gsap.fromTo(numChars,
+          { opacity: 0, y: 8 },
+          { opacity: 1, y: 0, stagger: 0.03, duration: 0.3, ease: 'power2.out' }
+        );
+        gsap.to(numEl, { opacity: 1, duration: 0.01 });
 
-      // Fade in description
-      gsap.to(descEl, { opacity: 1, duration: 0.35, ease: 'power2.out' });
-    });
+        // Fade in description
+        gsap.to(descEl, { opacity: 1, duration: 0.35, ease: 'power2.out' });
+      });
 
-    item.addEventListener('mouseleave', function () {
-      item.classList.remove('is-hovered');
+      item.addEventListener('mouseleave', function () {
+        item.classList.remove('is-hovered');
 
-      // Kill any running tweens and reset immediately
-      gsap.killTweensOf(numEl);
-      gsap.killTweensOf(descEl);
-      var numSpans = numEl.querySelectorAll('span');
-      if (numSpans.length) numSpans.forEach(function (s) { gsap.killTweensOf(s); });
+        // Kill any running tweens and reset immediately
+        gsap.killTweensOf(numEl);
+        gsap.killTweensOf(descEl);
+        var numSpans = numEl.querySelectorAll('span');
+        if (numSpans.length) numSpans.forEach(function (s) { gsap.killTweensOf(s); });
 
-      restoreText(numEl, numText);
-      gsap.set(numEl, { opacity: 0 });
-      gsap.set(descEl, { opacity: 0 });
-    });
+        restoreText(numEl, numText);
+        gsap.set(numEl, { opacity: 0 });
+        gsap.set(descEl, { opacity: 0 });
+      });
+    }
   });
 })();
 
