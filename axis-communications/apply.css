@@ -4,6 +4,36 @@
    Fonts: Neue Haas Grotesk Display Pro + Playfair Display
    ============================================ */
 
+/* --- Film grain overlay --- */
+.grain-overlay {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='6' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  animation: grain 0.3s steps(8) infinite;
+}
+
+@keyframes grain {
+  0%   { transform: translate(0, 0); }
+  10%  { transform: translate(-5%, -10%); }
+  20%  { transform: translate(-15%, 5%); }
+  30%  { transform: translate(7%, -20%); }
+  40%  { transform: translate(-5%, 15%); }
+  50%  { transform: translate(-15%, 10%); }
+  60%  { transform: translate(15%, 0%); }
+  70%  { transform: translate(0%, 10%); }
+  80%  { transform: translate(3%, -25%); }
+  90%  { transform: translate(-10%, 10%); }
+  100% { transform: translate(-5%, 5%); }
+}
+
 /* --- Fonts --- */
 @import url('https://fonts.cdnfonts.com/css/neue-haas-grotesk-display-pro');
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap');
@@ -1633,16 +1663,23 @@ section + section {
 @media (max-width: 767px) {
   .proof-content {
     grid-template-columns: 1fr;
-    gap: 48px;
+    gap: 40px;
   }
 
   .proof-left p {
     max-width: none;
+    text-align: center;
+  }
+
+  .proof-right {
+    padding-left: 0;
   }
 }
 
 /* --- Closing / CTA Section --- */
 .closing-section {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1665,6 +1702,10 @@ section + section {
   line-height: 1.2;
   letter-spacing: -0.02em;
   max-width: 800px;
+}
+
+.closing-name {
+  font-weight: 600;
 }
 
 .closing-sub {
@@ -1767,19 +1808,22 @@ section + section {
     align-items: center;
     padding: 24px var(--container-padding) 20px;
     gap: 0;
+    mix-blend-mode: normal;
   }
 
   .hero__logo {
     position: fixed;
     top: 24px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: var(--container-padding);
+    transform: none;
     z-index: 100;
     margin-bottom: 20px;
+    mix-blend-mode: normal;
   }
 
   .hero__logo img {
     margin-top: 0;
+    filter: none;
   }
 
   .hero__top-center {
@@ -1795,23 +1839,27 @@ section + section {
 
   .hero__greeting img {
     height: 22px;
+    filter: none;
   }
 
   .hero__tagline {
     font-size: 14px;
-    margin-top: 10px;
+    padding-top: 10px;
     text-align: center;
+    max-width: 240px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   /* --- Hero: bigger heading, centered like reference --- */
   .hero {
-    padding: 0 0 60px;
+    padding: 0 0 20px;
     min-height: 100vh;
     min-height: 100svh;
   }
 
   .hero__main {
-    padding-top: 30vh;
+    padding-top: 20vh;
     padding-left: var(--container-padding);
     padding-right: var(--container-padding);
   }
@@ -1876,6 +1924,100 @@ section + section {
 
   .video-section__player {
     max-width: 100%;
+    border-radius: 16px;
+  }
+
+  .video-section {
+    align-items: flex-start;
+  }
+
+  .video-section__content {
+    padding-top: 20vh;
+  }
+
+  .video-section__heading {
+    margin-bottom: 20px;
+    text-align: left;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-left: calc(var(--container-padding) * -1);
+    margin-right: calc(var(--container-padding) * -1);
+  }
+
+  .video-section__sub {
+    margin-bottom: -30vh;
+    font-size: 14px;
+  }
+
+  .video-outro {
+    font-size: 14px;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* --- Section spacing: tighter on mobile --- */
+  section + section {
+    margin-top: 15vh;
+  }
+
+  .hero + section {
+    margin-top: -20vh;
+  }
+
+  /* --- Proof: unstick left column, tighten box --- */
+  .proof-left {
+    position: static;
+  }
+
+  .proof-box {
+    margin: 0 16px;
+    border-radius: 24px;
+  }
+
+  .proof-closing {
+    margin-top: 10vh;
+  }
+
+  .proof-intro {
+    margin-bottom: 6vh;
+  }
+
+  /* --- About: tighten spacing --- */
+  .about-intro {
+    margin-bottom: 60px;
+  }
+
+  .text-reveal .about-columns {
+    margin-bottom: 80px;
+  }
+
+  .text-reveal .about-outro {
+    margin-top: 60px;
+  }
+
+  .section-about {
+    padding-bottom: 10vh;
+  }
+
+  .clients-intro {
+    margin-bottom: 20vh;
+  }
+
+  .clients-outro {
+    margin-top: 10vh;
+  }
+
+  /* --- Closing: ensure visible height + padding --- */
+  .closing-section {
+    min-height: 80vh;
+    min-height: 80svh;
+    padding-top: 10vh;
+    padding-bottom: 10vh;
+  }
+
+  .closing-heading {
+    font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
   }
 }
 

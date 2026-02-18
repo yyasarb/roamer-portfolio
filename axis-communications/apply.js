@@ -301,9 +301,41 @@
   var progressFill = document.getElementById('videoProgressFill');
   var iframe       = playerEl ? playerEl.querySelector('iframe') : null;
   if (!section || !playerEl) return;
+  var isMobile = window.matchMedia('(max-width: 767px)').matches;
+  var isSmallMobile = window.matchMedia('(max-width: 390px)').matches;
 
   var heading = section.querySelector('.video-section__heading');
   var sub     = section.querySelector('.video-section__sub');
+
+  // --- Mobile: graduated line-height per word, responsive sizing ---
+  if (isMobile && heading) {
+    var rawText = heading.innerHTML.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '');
+    var words = rawText.split(/\s+/).filter(function (w) { return w.length > 0; });
+    heading.innerHTML = '';
+    var startLH = 50;
+    var endLH = 90;
+    var containerWidth = window.innerWidth - 10;
+    var measure = document.createElement('span');
+    measure.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-family:inherit;font-weight:inherit;font-size:100px;';
+    heading.appendChild(measure);
+    // Find the longest word and size all words to that
+    var maxWordWidth = 0;
+    for (var wi = 0; wi < words.length; wi++) {
+      measure.textContent = words[wi];
+      if (measure.offsetWidth > maxWordWidth) maxWordWidth = measure.offsetWidth;
+    }
+    var fixedSize = (containerWidth / maxWordWidth) * 100;
+    heading.removeChild(measure);
+    for (var wi = 0; wi < words.length; wi++) {
+      var lh = words.length > 1 ? startLH + (endLH - startLH) * (wi / (words.length - 1)) : startLH;
+      var wordSpan = document.createElement('span');
+      wordSpan.style.lineHeight = lh + '%';
+      wordSpan.style.display = 'block';
+      wordSpan.style.fontSize = fixedSize + 'px';
+      wordSpan.textContent = words[wi];
+      heading.appendChild(wordSpan);
+    }
+  }
 
   // --- State ---
   var vimeo       = null;
@@ -379,23 +411,60 @@
     }
   });
 
+  var mobileVideoY = 0;
+  var mobileVideoStart = 0;
+  if (isMobile) {
+    var playerRect = playerEl.getBoundingClientRect();
+    var sectionRect = section.getBoundingClientRect();
+    var playerOffsetInSection = playerRect.top - sectionRect.top;
+    var targetTop = window.innerHeight * 0.30;
+    mobileVideoY = targetTop - playerOffsetInSection;
+
+    // Calculate when heading bottom reaches 70vh
+    var headingRect = heading.getBoundingClientRect();
+    var headingInitialBottom = headingRect.bottom;
+    var trigger70vh = window.innerHeight * 0.70;
+    // heading moves -160vh over duration 1.0 (matches scroll speed)
+    var scrollTravel = window.innerHeight * 1.60;
+    if (headingInitialBottom > trigger70vh) {
+      mobileVideoStart = (headingInitialBottom - trigger70vh) / scrollTravel;
+    }
+  }
   tl.fromTo(playerEl,
-    { scale: 0.3, rotate: 3, y: 0, borderRadius: '48px' },
-    { scale: 0.88, rotate: 0, y: '-20vh', borderRadius: '24px', duration: 0.50, ease: 'none' },
-    0
+    { scale: 0.3, rotate: 3, y: 0, borderRadius: isMobile ? '24px' : '48px' },
+    { scale: isMobile ? 1.0 : 0.88, rotate: 0, y: isMobile ? mobileVideoY : '-20vh', borderRadius: isMobile ? '16px' : '24px', duration: 0.50, ease: 'none' },
+    isMobile ? mobileVideoStart : 0
   );
 
-  tl.fromTo(heading, { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.25, ease: 'none' }, 0.10);
-  tl.fromTo(sub,     { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.20, ease: 'none' }, 0.15);
-  tl.fromTo(text1,   { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.15, ease: 'none' }, 0.25);
+  if (isMobile) {
+    // Move heading at natural scroll speed: total pin scroll = 160vh, full timeline = 1.0
+    // So 1.0 of timeline = 160vh of y-travel to match real scroll
+    tl.fromTo(heading, { y: 0 }, { y: '-160vh', duration: 1.0, ease: 'none' }, 0);
+    tl.fromTo(sub,     { y: 0 }, { y: '-160vh', duration: 1.0, ease: 'none' }, 0);
+    // Fade out when bottom reaches 70vh
+    tl.fromTo(heading, { opacity: 1 }, { opacity: 0, duration: 0.15, ease: 'none' }, mobileVideoStart);
+    tl.fromTo(sub,     { opacity: 1 }, { opacity: 0, duration: 0.10, ease: 'none' }, mobileVideoStart + 0.05);
+    // "Now imagine..." appears at the same time as video
+    tl.fromTo(text1,   { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.15, ease: 'none' }, mobileVideoStart);
+  } else {
+    tl.fromTo(heading, { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.25, ease: 'none' }, 0.10);
+    tl.fromTo(sub,     { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.20, ease: 'none' }, 0.15);
+    tl.fromTo(text1,   { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.15, ease: 'none' }, 0.25);
+  }
 
   // --- Position footer responsively below video ---
   var footer = section.querySelector('.video-section__footer');
   function positionFooter() {
     if (!footer) return;
-    var videoCenter = window.innerHeight * 0.30;
-    var videoVisualHalfH = (playerEl.offsetHeight * 0.88) / 2;
-    footer.style.top = 'calc(' + (videoCenter + videoVisualHalfH) + 'px + 3rem)';
+    if (isMobile) {
+      var videoTop = window.innerHeight * 0.20;
+      var videoH = playerEl.offsetHeight;
+      footer.style.top = (videoTop + videoH + 24) + 'px';
+    } else {
+      var videoCenter = window.innerHeight * 0.30;
+      var videoVisualHalfH = (playerEl.offsetHeight * 0.88) / 2;
+      footer.style.top = 'calc(' + (videoCenter + videoVisualHalfH) + 'px + 3rem)';
+    }
   }
   positionFooter();
   window.addEventListener('resize', positionFooter);
@@ -420,20 +489,27 @@
     }
 
     // Show the container, then reveal chars
-    tl.to(videoOutro, { opacity: 1, duration: 0.01, ease: 'none' }, 0.55);
+    var outroStart = isMobile ? 0.75 : 0.55;
+    tl.to(videoOutro, { opacity: 1, duration: 0.01, ease: 'none' }, outroStart);
 
     if (outroChars.length) {
-      var outroStagger = outroChars.length > 1 ? 0.20 / outroChars.length : 0.20;
+      var totalReveal = isSmallMobile ? 2.00 : isMobile ? 0.80 : 0.20;
+      var charDuration = outroChars.length > 1 ? totalReveal / outroChars.length : totalReveal;
       tl.to(outroChars, {
         opacity: 1,
-        stagger: outroStagger,
-        duration: outroStagger,
+        stagger: charDuration,
+        duration: charDuration,
         ease: 'none'
-      }, 0.55);
+      }, outroStart);
     }
 
-    // Animate outro from 80vh to 70vh
-    tl.to(videoOutro, { top: '75vh', duration: 0.20, ease: 'none' }, 0.55);
+    // Animate outro position
+    if (isMobile) {
+      videoOutro.style.top = '72vh';
+      tl.to(videoOutro, { top: '68vh', duration: 0.20, ease: 'none' }, outroStart);
+    } else {
+      tl.to(videoOutro, { top: '75vh', duration: 0.20, ease: 'none' }, 0.55);
+    }
   }
 
   // --- Play button ---

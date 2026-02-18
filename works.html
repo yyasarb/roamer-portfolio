@@ -292,11 +292,21 @@
 
     <div class="works-content">
       <div class="works-header">
-        <p class="works-count">{001}</p>
+        <p class="works-count">(001)</p>
         <p class="works-scroll-hint">(Scroll to explore)</p>
       </div>
 
       <div class="works-track">
+
+        <div class="works-slide" data-title="You Cannot Hide" data-meta="Documentary, glass artist portrait">
+          <a href="works/you-cannot-hide.html" class="works-card">
+            <img src="images/you-cannot-hide-thumb.jpg" loading="eager" alt="You Cannot Hide" sizes="50vw">
+          </a>
+          <div class="works-slide__info">
+            <h2 class="works-info__title">You Cannot Hide</h2>
+            <p class="works-info__meta">Documentary, glass artist portrait</p>
+          </div>
+        </div>
 
         <div class="works-slide" data-title="EIT Urban Mobility" data-meta="Promotional video, cycling content">
           <a href="works/cycling-promotion.html" class="works-card">
@@ -338,12 +348,12 @@
           </div>
         </div>
 
-        <div class="works-slide" data-title="EIT Urban Mobility" data-meta="Documentary, winter transportation">
+        <div class="works-slide" data-title="Urban Mobility in Extreme Winter" data-meta="Documentary, winter transportation">
           <a href="works/urban-transportation.html" class="works-card">
-            <img src="images/umx-lulea.jpg" loading="eager" alt="EIT Urban Mobility" srcset="images/umx-lulea-p-500.jpg 500w, images/umx-lulea-p-800.jpg 800w, images/umx-lulea-p-1080.jpg 1080w, images/umx-lulea-p-1600.jpg 1600w, images/umx-lulea.jpg 1920w" sizes="50vw">
+            <img src="images/urban-mobility-winter-thumb.jpg" loading="eager" alt="Urban Mobility in Extreme Winter" sizes="50vw">
           </a>
           <div class="works-slide__info">
-            <h2 class="works-info__title">EIT Urban Mobility</h2>
+            <h2 class="works-info__title">Urban Mobility in Extreme Winter</h2>
             <p class="works-info__meta">Documentary, winter transportation</p>
           </div>
         </div>
@@ -383,8 +393,8 @@
       <!-- Fixed text area that transitions between cards -->
       <div class="works-info">
         <div class="works-info__inner">
-          <h2 class="works-info__title">EIT Urban Mobility</h2>
-          <p class="works-info__meta">Promotional video, cycling content</p>
+          <h2 class="works-info__title">You Cannot Hide</h2>
+          <p class="works-info__meta">Documentary, glass artist portrait</p>
         </div>
       </div>
     </div>
@@ -513,7 +523,7 @@
         scrollTrigger: {
           trigger: '.works-carousel',
           pin: true,
-          scrub: 0.5,
+          scrub: true,
           end: '+=' + totalScroll,
           invalidateOnRefresh: true,
           onUpdate: function(self) {
@@ -541,7 +551,7 @@
               }
             });
 
-            countEl.textContent = '{' + String(closest + 1).padStart(3, '0') + '}';
+            countEl.textContent = '(' + String(closest + 1).padStart(3, '0') + ')';
             updateInfo(closest);
           }
         }
