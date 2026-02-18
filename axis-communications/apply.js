@@ -3,6 +3,32 @@
    Vanilla JS, no dependencies
    ============================================ */
 
+/* --- Lenis Smooth Scroll --- */
+(function () {
+  if (typeof Lenis === 'undefined') return;
+
+  var lenis = new Lenis({
+    duration: 1.2,
+    easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+    smoothWheel: true
+  });
+
+  // Sync Lenis with GSAP ScrollTrigger
+  if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(function (time) {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+  } else {
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+  }
+})();
+
 (function () {
   'use strict';
 
@@ -65,37 +91,191 @@
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
-  // --- Hide nav on dark sections ---
-  const siteNav = document.getElementById('siteNav');
-  const darkSections = document.querySelectorAll('.section--dark');
+})();
 
-  if (siteNav && darkSections.length > 0) {
-    const navObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            siteNav.classList.add('is-hidden');
-          } else {
-            siteNav.classList.remove('is-hidden');
-          }
-        });
-      },
-      { threshold: 0, rootMargin: '-1px 0px 0px 0px' }
-    );
+/* --- Text Reveal: scroll-driven letter-by-letter opacity --- */
+(function () {
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
-    darkSections.forEach((section) => navObserver.observe(section));
+  var wrapper = document.getElementById('textReveal');
+  if (!wrapper) return;
+
+  var columnParagraphs = wrapper.querySelectorAll('.about-column');
+  var outroParagraph = wrapper.querySelector('.about-outro');
+  var columnChars = [];
+  var outroChars = [];
+
+  function splitChars(p, arr) {
+    var text = p.textContent;
+    p.textContent = '';
+    for (var i = 0; i < text.length; i++) {
+      if (text[i] === ' ') {
+        p.appendChild(document.createTextNode(' '));
+        continue;
+      }
+      var span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = text[i];
+      span.style.display = 'inline';
+      p.appendChild(span);
+      arr.push(span);
+    }
   }
 
-  // --- Smooth scroll for anchor links ---
-  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-    anchor.addEventListener('click', function (e) {
-      const targetId = this.getAttribute('href');
-      if (targetId === '#') return;
+  columnParagraphs.forEach(function (p) { splitChars(p, columnChars); });
+  if (outroParagraph) splitChars(outroParagraph, outroChars);
 
-      const target = document.querySelector(targetId);
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Sequenced reveal: columns → line → outro in one unified timeline
+  var aboutLine = document.getElementById('aboutLine');
+
+  var tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: '#textReveal',
+      start: 'top 75%',
+      end: 'top 25%',
+      scrub: true
+    }
+  });
+
+  // Scroll range: 75% → 25% (50% of viewport)
+  // Line completes at 0.9 → trigger top at 30%
+  // Outro completes at 1.0 → trigger top at 25%
+  var colStagger = columnChars.length > 1 ? 0.45 / columnChars.length : 0.45;
+
+  // Phase 1 (0 → 0.45): column chars reveal letter by letter
+  tl.to(columnChars, {
+    opacity: 1,
+    stagger: colStagger,
+    duration: colStagger,
+    ease: 'none'
+  }, 0);
+
+  // Phase 2 (0.45 → 0.9): line draws left→right, completes at 70vh
+  if (aboutLine) {
+    tl.to(aboutLine, {
+      scaleX: 1,
+      ease: 'none',
+      duration: 0.45
+    }, 0.45);
+  }
+
+  // Phase 2b (0.65 → 1.0): outro chars reveal, completes at 75vh
+  if (outroChars.length) {
+    var outroStagger = outroChars.length > 1 ? 0.35 / outroChars.length : 0.35;
+    tl.to(outroChars, {
+      opacity: 1,
+      stagger: outroStagger,
+      duration: outroStagger,
+      ease: 'none'
+    }, 0.65);
+  }
+
+  // Parallax: outro + line share the same trigger so they stay in sync
+  var parallaxTrigger = {
+    trigger: aboutLine,
+    start: 'bottom bottom',
+    end: 'top 55%',
+    scrub: true
+  };
+
+  if (outroParagraph) {
+    gsap.to(outroParagraph, {
+      y: '20vh',
+      ease: 'none',
+      scrollTrigger: Object.assign({}, parallaxTrigger)
+    });
+  }
+
+  if (aboutLine) {
+    gsap.to(aboutLine, {
+      y: '20vh',
+      ease: 'none',
+      scrollTrigger: Object.assign({}, parallaxTrigger)
+    });
+  }
+
+  // Vertical line: reveals top→bottom between horizontal line and next section
+  var aboutVLine = document.getElementById('aboutVLine');
+  if (aboutVLine) {
+    gsap.to(aboutVLine, {
+      y: '20vh',
+      ease: 'none',
+      scrollTrigger: Object.assign({}, parallaxTrigger)
+    });
+
+    gsap.to(aboutVLine, {
+      scaleY: 1,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: aboutVLine,
+        start: 'top 80%',
+        end: 'bottom 40%',
+        scrub: true
+      }
+    });
+  }
+
+})();
+
+/* --- Clients Outro: scroll-driven letter-by-letter reveal --- */
+(function () {
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+  var el = document.getElementById('clientsOutro');
+  if (!el) return;
+
+  var chars = [];
+  var text = el.textContent;
+  el.textContent = '';
+  for (var i = 0; i < text.length; i++) {
+    if (text[i] === ' ') {
+      el.appendChild(document.createTextNode(' '));
+      continue;
+    }
+    var span = document.createElement('span');
+    span.className = 'char';
+    span.textContent = text[i];
+    span.style.display = 'inline';
+    el.appendChild(span);
+    chars.push(span);
+  }
+
+  if (chars.length) {
+    var stagger = chars.length > 1 ? 1 / chars.length : 1;
+    gsap.to(chars, {
+      opacity: 1,
+      stagger: stagger,
+      duration: stagger,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 90%',
+        end: 'top 75%',
+        scrub: true
+      }
+    });
+  }
+})();
+
+/* --- Clients Section: negative parallax on heading + outro --- */
+(function () {
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+  var heading = document.querySelector('.clients-heading');
+  var outro = document.getElementById('clientsOutro');
+  var section = document.querySelector('.clients-section');
+  if (!section) return;
+
+  var targets = [heading, outro].filter(Boolean);
+  targets.forEach(function (el) {
+    gsap.to(el, {
+      y: '15vh',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true
       }
     });
   });
@@ -112,7 +292,6 @@
   var playerEl     = document.getElementById('videoPlayer');
   var text1        = document.getElementById('videoText1');
   var text2        = document.getElementById('videoText2');
-  var arrow        = document.getElementById('videoArrow');
   var overlay      = document.getElementById('videoPlayOverlay');
   var pauseBtn     = document.getElementById('videoPauseBtn');
   var subtitlesBtn = document.getElementById('videoSubtitlesBtn');
@@ -175,16 +354,16 @@
     scrollTrigger: {
       trigger: section,
       start: 'top top',
-      end: '+=150%',
+      end: '+=160%',
       pin: true,
       scrub: 0.5,
       onUpdate: function (self) {
         var progress = self.progress;
 
-        if (progress >= 0.75 && !isFullScale) {
+        if (progress >= 0.50 && !isFullScale) {
           isFullScale = true;
           if (!isPlaying && overlay) overlay.classList.add('is-visible');
-        } else if (progress < 0.75 && isFullScale) {
+        } else if (progress < 0.50 && isFullScale) {
           isFullScale = false;
           if (isPlaying) {
             isPlaying = false;
@@ -202,15 +381,60 @@
 
   tl.fromTo(playerEl,
     { scale: 0.3, rotate: 3, y: 0, borderRadius: '48px' },
-    { scale: 0.78, rotate: 0, y: '-18vh', borderRadius: '14px', duration: 0.75, ease: 'none' },
+    { scale: 0.88, rotate: 0, y: '-20vh', borderRadius: '24px', duration: 0.50, ease: 'none' },
     0
   );
 
-  tl.to(heading, { opacity: 0, y: -30, duration: 0.4, ease: 'none' }, 0.2);
-  tl.to(sub,     { opacity: 0, y: -20, duration: 0.3, ease: 'none' }, 0.25);
-  tl.to(text1,   { opacity: 1, y: 0, duration: 0.13, ease: 'none' }, 0.75);
-  tl.to(text2,   { opacity: 1, y: 0, duration: 0.1, ease: 'none' }, 0.85);
-  if (arrow) tl.to(arrow, { opacity: 1, duration: 0.08, ease: 'none' }, 0.92);
+  tl.fromTo(heading, { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.25, ease: 'none' }, 0.10);
+  tl.fromTo(sub,     { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.20, ease: 'none' }, 0.15);
+  tl.fromTo(text1,   { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.15, ease: 'none' }, 0.25);
+
+  // --- Position footer responsively below video ---
+  var footer = section.querySelector('.video-section__footer');
+  function positionFooter() {
+    if (!footer) return;
+    var videoCenter = window.innerHeight * 0.30;
+    var videoVisualHalfH = (playerEl.offsetHeight * 0.88) / 2;
+    footer.style.top = 'calc(' + (videoCenter + videoVisualHalfH) + 'px + 3rem)';
+  }
+  positionFooter();
+  window.addEventListener('resize', positionFooter);
+
+  // --- Video Outro: char-by-char reveal inside the pinned timeline ---
+  var videoOutro = document.getElementById('videoOutro');
+  if (videoOutro) {
+    var outroChars = [];
+    var outroText = videoOutro.textContent;
+    videoOutro.textContent = '';
+    for (var i = 0; i < outroText.length; i++) {
+      if (outroText[i] === ' ') {
+        videoOutro.appendChild(document.createTextNode(' '));
+        continue;
+      }
+      var span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = outroText[i];
+      span.style.display = 'inline';
+      videoOutro.appendChild(span);
+      outroChars.push(span);
+    }
+
+    // Show the container, then reveal chars
+    tl.to(videoOutro, { opacity: 1, duration: 0.01, ease: 'none' }, 0.55);
+
+    if (outroChars.length) {
+      var outroStagger = outroChars.length > 1 ? 0.20 / outroChars.length : 0.20;
+      tl.to(outroChars, {
+        opacity: 1,
+        stagger: outroStagger,
+        duration: outroStagger,
+        ease: 'none'
+      }, 0.55);
+    }
+
+    // Animate outro from 80vh to 70vh
+    tl.to(videoOutro, { top: '75vh', duration: 0.20, ease: 'none' }, 0.55);
+  }
 
   // --- Play button ---
   if (overlay) {
@@ -311,37 +535,19 @@
   var skillsBox = skillsSection ? skillsSection.querySelector('.skills-box') : null;
   if (!skillsSection || !skillsBox) return;
 
-  // --- Nav hide on skills section (dark bg) ---
-  var siteNav = document.getElementById('siteNav');
-  if (siteNav) {
-    var skillsNavObserver = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            siteNav.classList.add('is-hidden');
-          } else {
-            siteNav.classList.remove('is-hidden');
-          }
-        });
-      },
-      { threshold: 0, rootMargin: '-1px 0px 0px 0px' }
-    );
-    skillsNavObserver.observe(skillsBox);
-  }
-
   // --- GSAP scroll animation: box grows to fill viewport ---
   // Expansion happens as the section scrolls into view (no pin)
   var skillsTl = gsap.timeline({
     scrollTrigger: {
       trigger: skillsSection,
-      start: 'top 80%',
+      start: 'top 100%',
       end: 'top 50%',
       scrub: 0.5
     }
   });
 
   skillsTl.fromTo(skillsBox,
-    { margin: '24px', borderRadius: '32px' },
+    { margin: '48px', borderRadius: '48px' },
     { margin: '0px', borderRadius: '0px', duration: 1, ease: 'none' },
     0
   );
@@ -358,7 +564,7 @@
 
   shrinkTl.fromTo(skillsBox,
     { margin: '0px', borderRadius: '0px' },
-    { margin: '24px', borderRadius: '32px', duration: 1, ease: 'none' },
+    { margin: '48px', borderRadius: '48px', duration: 1, ease: 'none' },
     0
   );
 
@@ -446,4 +652,61 @@
       }
     }
   );
+})();
+
+/* --- Proof Closing: scroll-driven letter-by-letter reveal --- */
+(function () {
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+  var el = document.getElementById('proofClosing');
+  var proofContent = document.querySelector('.proof-content');
+  var proofLeft = document.querySelector('.proof-left');
+  if (!el || !proofContent || !proofLeft) return;
+
+  // Sticky releases when proof-content bottom = 40vh + proof-left height
+  var stickyTopPx = window.innerHeight * 0.4;
+  var unstickPoint = stickyTopPx + proofLeft.offsetHeight;
+
+  var chars = [];
+  var text = el.textContent;
+  el.textContent = '';
+  for (var i = 0; i < text.length; i++) {
+    if (text[i] === ' ') {
+      el.appendChild(document.createTextNode(' '));
+      continue;
+    }
+    var span = document.createElement('span');
+    span.className = 'char';
+    span.textContent = text[i];
+    span.style.display = 'inline';
+    el.appendChild(span);
+    chars.push(span);
+  }
+
+  if (chars.length) {
+    var stagger = chars.length > 1 ? 1 / chars.length : 1;
+    gsap.to(chars, {
+      opacity: 1,
+      stagger: stagger,
+      duration: stagger,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: proofContent,
+        start: 'bottom ' + unstickPoint + 'px',
+        end: 'bottom ' + (unstickPoint - window.innerHeight * 0.15) + 'px',
+        scrub: true
+      }
+    });
+  }
+
+  gsap.to(el, {
+    y: '35vh',
+    ease: 'none',
+    scrollTrigger: {
+      trigger: document.querySelector('.proof-section'),
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: true
+    }
+  });
 })();
