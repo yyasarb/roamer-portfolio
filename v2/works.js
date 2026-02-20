@@ -26,8 +26,8 @@
         '<strong>someone who actually reads</strong> Google Analytics'
       ],
       tags: ['SEO Strategy', 'Content Marketing', 'Brand Creation', 'E-Commerce', 'Organic Growth', 'Copywriting', 'Sales Strategy', 'Analytics', 'AI Automation', 'Generative AI', 'Content Systems'],
-      image: 'images/terralina.jpg',
-      video: null,
+      image: 'images/liberte.jpg',
+      video: 'videos/liberte.mp4',
       title: 'Terralina',
       desc: 'Terralina started with no audience, no ads, and no budget for either. I built the brand, wrote SEO driven content, built AI automation tools for image generation and content creation, and generated sales within the first month. Zero ad spend. All organic. When your systems do the selling, you do not need a media budget.'
     },
@@ -39,8 +39,8 @@
         '<strong>full stack</strong> but make it <strong>beautiful</strong>'
       ],
       tags: ['Full Stack Development', 'Web Application', 'UX Design', 'Backend', 'Frontend Development', 'Database Architecture', 'Brand Identity', 'Bilingual Platform'],
-      image: 'images/fikola.jpg',
-      video: null,
+      image: 'images/liberte.jpg',
+      video: 'videos/liberte.mp4',
       title: 'Fikola',
       desc: 'Fikola is a bilingual ride-sharing platform I built from scratch. Not just the brand. The actual product. Backend, frontend, database, email systems, deployment. One person, zero investors, fully functional. Free to use, no ads, no data selling. Just a working platform that solves a real problem. Visit fikola.com and see for yourself.'
     },
@@ -52,8 +52,8 @@
         '<strong>filmmaker who does</strong> not need a full crew to <strong>deliver</strong>'
       ],
       tags: ['Director of Photography', 'Documentary Filmmaking', 'Pre-Production Research', 'Interview Sourcing', 'Location Scouting', 'Cinematography', 'Aerial Cinematography', 'International Production', 'Cross-Border Collaboration'],
-      image: 'images/business-insider.jpg',
-      video: null,
+      image: 'images/liberte.jpg',
+      video: 'videos/liberte.mp4',
       title: 'Business Insider',
       desc: 'Eight million views. That is how many people watched a documentary I shot for Business Insider. I did not just show up with a camera. I researched the subject, found the people worth interviewing, scouted every location, and filmed across Norway and Nigeria while working with a UK based producer. Cinematography and aerial. Pre-production to final delivery.'
     },
@@ -65,8 +65,8 @@
         '<strong>storyteller who does</strong> not need a narrator to <strong>make a point</strong>'
       ],
       tags: ['Documentary Filmmaking', 'Storytelling', 'Sit Down Interviews', 'Cinematography', 'Color Grading', 'Narrative Film', 'Multi-Country Production', 'Urban Planning', 'Sustainability Content'],
-      image: 'images/eit.jpg',
-      video: null,
+      image: 'images/liberte.jpg',
+      video: 'videos/liberte.mp4',
       title: 'EIT Urban Mobility',
       desc: 'Can you bike to work when it is minus forty? That is the kind of question I turned into a film people actually wanted to watch. Multiple documentary and narrative projects for EIT Urban Mobility, shot across three countries. Complex problems around urban planning and sustainable transport, told through real people and real stories. Interviews, cinematography, color grading, and storytelling that makes innovation feel human instead of institutional.'
     },
@@ -78,8 +78,8 @@
         '<strong>filmmaker who</strong> makes strangers <strong>feel like someone</strong> you know'
       ],
       tags: ['Director', 'Cinematic Storytelling', 'Portrait Film', 'Customer Stories', 'Narrative Filmmaking', 'Cinematography', 'Art Direction', 'Brand Storytelling', 'Human Interest'],
-      image: 'images/you-cannot.jpg',
-      video: null,
+      image: 'images/liberte.jpg',
+      video: 'videos/liberte.mp4',
       title: 'You Cannot Hide',
       desc: 'A glass artist on Bornholm, working alone in her studio between silence and heat. No script. No product placement. No voiceover telling you what to feel. Just a real person and the invisible process that shapes her work. I directed and produced "You Cannot Hide," a cinematic portrait of Manon Hillereau. This is the approach that works for customer stories. Follow someone in their world, let the craft speak, and the brand becomes felt instead of forced.'
     },
@@ -91,8 +91,8 @@
         '<strong>pilot who gets the shot</strong> and the paperwork right'
       ],
       tags: ['Licensed Drone Operator', 'Aerial Cinematography', 'European Drone Regulations', 'Airspace Planning', 'Flight Permits', 'Safety Protocols', 'Restricted Airspace Operations', 'Cinematic Filming', 'Production Planning', 'DJI Systems'],
-      image: 'images/drone.jpg',
-      video: null,
+      image: 'images/liberte.jpg',
+      video: 'videos/liberte.mp4',
       title: 'Aerial Cinematography',
       desc: 'The difference between a drone operator and an aerial cinematographer is paperwork, planning, and taste. I handle all three. Licensed, regulation-fluent, and experienced in restricted airspace operations across Europe. I do not just fly up and press record. I plan the shot, file the permits, and deliver footage that looks like it belongs on a cinema screen.'
     }
