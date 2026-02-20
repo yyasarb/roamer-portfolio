@@ -370,8 +370,9 @@
       worksVideo.src = work.video;
       worksVideo.load();
     } else {
+      worksVideo.pause();
       worksVideo.removeAttribute('src');
-      worksVideo.load();
+      worksVideo.poster = work.image;
     }
 
     // Snap card rotation to current mouse position (no lerp jump on appear)
@@ -389,9 +390,8 @@
     // Show case container
     caseEl.classList.add('is-visible');
 
-    // Return promise gated on canplaythrough with timeout fallback
+    // Return promise gated on video readiness
     if (!work.video) {
-      worksVideo.pause();
       return Promise.resolve();
     }
     return new Promise(function (resolve) {
@@ -403,8 +403,14 @@
         resolve();
       }
 
+      // Already buffered (e.g. cached)
+      if (worksVideo.readyState >= 3) {
+        done();
+        return;
+      }
+
       worksVideo.addEventListener('canplaythrough', done, { once: true });
-      setTimeout(done, 3000);
+      setTimeout(done, 2000);
     });
   }
 
